@@ -1,0 +1,291 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Introduction to Amazon EMR",
+    "Mappings": {
+        "UserConfig": {
+            "Login": {
+                "Name": "student",
+                "Pass": "password"
+            }
+        }
+    },
+    "Resources": {
+        "RoleForEMR": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "elasticmapreduce.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess"
+                ],
+                "Path": "/",
+                "RoleName": "RoleForEMR"
+            }
+        },
+        "RoleForEC2": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role"
+                ],
+                "Path": "/",
+                "RoleName": "RoleForEC2"
+            }
+        },
+        "ProfileForEC2": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "RoleForEC2"
+                    }
+                ],
+                "InstanceProfileName": "RoleForEC2"
+            }
+        },
+        "Group": {
+            "Type": "AWS::IAM::Group",
+            "Properties": {
+                "GroupName": "Students",
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "students-policy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudwatch:Describe*",
+                                        "cloudwatch:List*",
+                                        "cloudwatch:Get*",
+                                        "s3:List*",
+                                        "s3:Get*",
+                                        "s3:CreateBucket",
+                                        "s3:PutBucketPolicy",
+                                        "s3:PutObject",
+                                        "s3:PutObjectACL",
+                                        "s3:PutObjectTagging",
+                                        "s3:PutObjectVersionTagging",
+                                        "s3:PutObjectVersionAcl",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteBucket",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:DeleteBucketPolicy",
+                                        "elasticmapreduce:List*",
+                                        "elasticmapreduce:Describe*",
+                                        "elasticmapreduce:AddJobFlowSteps",
+                                        "elasticmapreduce:CancelSteps",
+                                        "elasticmapreduce:RunJobFlow",
+                                        "elasticmapreduce:TerminateJobFlows",
+                                        "ec2:Describe*",
+                                        "ec2:AuthorizeSecurityGroupIngress",
+                                        "ec2:AuthorizeSecurityGroupEgress",
+                                        "ec2:CancelSpotInstanceRequests",
+                                        "ec2:CreateRoute",
+                                        "ec2:CreateSecurityGroup",
+                                        "ec2:CreateTags",
+                                        "ec2:CreateVpcEndpoint",
+                                        "ec2:DeleteRoute",
+                                        "ec2:DeleteTags",
+                                        "ec2:DeleteSecurityGroup",
+                                        "ec2:ModifyImageAttribute",
+                                        "ec2:ModifyInstanceAttribute",
+                                        "ec2:RevokeSecurityGroupEgress",
+                                        "ec2:TerminateInstances",
+                                        "ec2:DescribeKeyPairs",
+                                        "iam:ListRoles",
+                                        "iam:ListInstanceProfiles",
+                                        "kms:List*"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:AddRoleToInstanceProfile",
+                                        "iam:CreateInstanceProfile",
+                                        "iam:CreateRole"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Deny",
+                                    "Action": [
+                                        "iam:*"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:iam::*:user/student",
+                                        "arn:aws:iam::*:group/CloudAcademyStudents"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Deny",
+                                    "Action": [
+                                        "ec2:CreateKeyPair"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:AttachRolePolicy",
+                                        "iam:PutRolePolicy"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ],
+                                    "Condition": {
+                                        "ArnLike": {
+                                            "iam:PolicyArn": [
+                                                "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole",
+                                                "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role",
+                                                "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforAutoScalingRole"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:PassRole",
+                                        "iam:GetPolicy",
+                                        "iam:GetPolicyVersion"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/EMR_AutoScaling_DefaultRole*",
+                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/RoleForEMR",
+                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/RoleForEC2"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Deny",
+                                    "Action": [
+                                        "iam:*AccountAlias",
+                                        "ec2:ModifyInstanceAttribute",
+                                        "ec2:*Reserved*",
+                                        "ec2:*Spot*",
+                                        "ec2:*Host*",
+                                        "dynamodb:*Reserved*",
+                                        "rds:*Reserved*",
+                                        "elasticache:*Reserved*",
+                                        "redshift:*Reserved*",
+                                        "aws-marketplace:*"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:RunInstances"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:ec2:us-west-2:AWS-ACCOUNT-ID:instance/*"
+                                    ],
+                                    "Condition": {
+                                        "StringEquals": {
+                                            "ec2:InstanceType": [
+                                                "m5.xlarge"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:RunInstances"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:ec2:us-west-2::image/*",
+                                        "arn:aws:ec2:us-west-2::snapshot/*",
+                                        "arn:aws:ec2:us-west-2:*:key-pair/*",
+                                        "arn:aws:ec2:us-west-2:*:security-group/*",
+                                        "arn:aws:ec2:us-west-2:*:subnet/*",
+                                        "arn:aws:ec2:us-west-2:*:network-interface/*",
+                                        "arn:aws:ec2:us-west-2:*:volume/*",
+                                        "arn:aws:ec2:us-west-2:*:placement-group/*",
+                                        "arn:aws:ec2:us-west-2:*:vpc/*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:CreateServiceLinkedRole",
+                                        "iam:PutRolePolicy"
+                                    ],
+                                    "Resource": "arn:aws:iam::*:role/aws-service-role/elasticmapreduce.amazonaws.com/AWSServiceRoleForEMRCleanup*",
+                                    "Condition": {
+                                        "StringLike": {
+                                            "iam:AWSServiceName": "elasticmapreduce.amazonaws.com"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "User": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "LoginProfile": {
+                    "Password": {
+                        "Fn::FindInMap": [
+                            "UserConfig",
+                            "Login",
+                            "Pass"
+                        ]
+                    }
+                },
+                "Path": "/",
+                "Groups": [
+                    "Students"
+                ],
+                "UserName": {
+                    "Fn::FindInMap": [
+                        "UserConfig",
+                        "Login",
+                        "Name"
+                    ]
+                }
+            }
+        }
+    }
+}
