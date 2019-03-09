@@ -189,9 +189,42 @@
                                         "iam:GetPolicyVersion"
                                     ],
                                     "Resource": [
-                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/EMR_AutoScaling_DefaultRole*",
-                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/RoleForEMR",
-                                        "arn:aws:iam::AWS-ACCOUNT-ID:role/RoleForEC2"
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:iam::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":role/EMR_AutoScaling_DefaultRole*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:iam::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":role/RoleForEMR"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:iam::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":role/RoleForEC2"
+                                                ]
+                                            ]
+                                        }
                                     ]
                                 },
                                 {
@@ -216,7 +249,18 @@
                                         "ec2:RunInstances"
                                     ],
                                     "Resource": [
-                                        "arn:aws:ec2:us-west-2:AWS-ACCOUNT-ID:instance/*"
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:ec2:us-west-2:",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":instance/*"
+                                                ]
+                                            ]
+                                        }
                                     ],
                                     "Condition": {
                                         "StringEquals": {
